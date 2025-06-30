@@ -1,0 +1,12 @@
+package main
+
+import "fmt"
+
+// main方法是程序的入口
+// package必须声明为main，同时也必须有个main方法
+// 运行程序：go run main.go
+func main() {
+	// 方法名大写开头，表示该方法为公开方法，可以被其他包调用
+	// 方法名小写开头，表示该方法为私有方法，只能在当前包内访问
+	fmt.Println("Hello, world!")
+}
