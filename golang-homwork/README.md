@@ -1,24 +1,7 @@
 ### go基础（接口、结构体、方法、包、goroutine、channel、同步、并发）
-##### 开发环境准备
-##### 文件结构
-##### 基本数据类型
-##### 定义变量
-##### 指针
-##### 结构体
-##### 常量与枚举
-##### 运算操作符
-##### 流程控制
-##### 循环控制
-##### 函数、闭包与方法
-##### 变量的作用域
-##### 数组
-##### 切片
-##### map集合
-##### range迭代
-##### 类型转换
 
 ### go-web（gin、gorm、jwt、redis、mysql、kafka、websocket）
 
-
 ### go-zero（grpc、etcd、consul）
 
+### go-web + go-zero的应用使用dockerfile部署
