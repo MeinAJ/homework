@@ -15,4 +15,5 @@ func main() {
 	task.FindHuiWenShu(212)
 	task.IsValidBrackets("[][][{}]()(){}")
 	task.LongestCommonPrefix([]string{"1234567", "123456", "123456"})
+	task.PlusOne([]int{9, 9, 9, 9, 8})
 }

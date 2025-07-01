@@ -141,7 +141,35 @@ func LongestCommonPrefix(strs []string) string {
 	return result
 }
 
-// 加一 https://leetcode.cn/problems/plus-one/description/
+// PlusOne 加一 https://leetcode.cn/problems/plus-one/description/
+func PlusOne(digits []int) []int {
+	// 思路先转成字符串，再转成int，再加1，再转成[]int
+	plusOne := 1
+	size := len(digits)
+	for index := range digits {
+		// 倒叙判断
+		if digits[size-index-1]+plusOne == 10 {
+			plusOne = 1
+			digits[size-index-1] = 0
+		} else {
+			plusOne = 0
+			digits[size-index-1] = digits[size-index-1] + 1
+			break
+		}
+	}
+	if plusOne == 1 {
+		// 需要进一位
+		result := make([]int, size+1)
+		result[0] = 1
+		for i := range digits {
+			result[i+1] = digits[i]
+		}
+		fmt.Println("plus one:", result)
+		return result
+	}
+	fmt.Println("plus one:", digits)
+	return digits
+}
 
 // 删除有序数组中的重复项 https://leetcode.cn/problems/remove-duplicates-from-sorted-array/description/
 
