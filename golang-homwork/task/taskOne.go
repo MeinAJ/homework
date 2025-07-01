@@ -2,6 +2,7 @@ package task
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -51,7 +52,7 @@ func IsValidBrackets(s string) bool {
 	}
 	stack := newStack(len(s))
 	for _, char := range s {
-		// 逻辑：每次往里面插入时，判定一下栈顶元素是否相等，相等就出栈前一个元素
+		// 逻辑：每次往里面插入时，判定一下栈顶元素是否相等，相等就出栈元素
 		if stack.Peek() == '(' && char == ')' {
 			stack.Pop()
 			continue
@@ -116,7 +117,29 @@ func (stack *Stack) Peek() interface{} {
 	return nil
 }
 
-// 最长公共前缀 https://leetcode.cn/problems/longest-common-prefix/description/
+// LongestCommonPrefix 最长公共前缀 https://leetcode.cn/problems/longest-common-prefix/description/
+func LongestCommonPrefix(strs []string) string {
+	// 思路：先找到最小长度，再去一一对比每一个index位置的值是否相等，每次对比时发现不相等了，后面的就不用比较了
+	minSize := math.MaxInt64
+	for _, str := range strs {
+		if len(str) < minSize {
+			minSize = len(str)
+		}
+	}
+	result := ""
+	for i := 0; i < minSize; i++ {
+		currentChar := string(strs[0][i])
+		for _, str := range strs {
+			if currentChar != string(str[i]) {
+				fmt.Println("最长前缀：", result)
+				return result
+			}
+		}
+		result += currentChar
+	}
+	fmt.Println("最长前缀：", result)
+	return result
+}
 
 // 加一 https://leetcode.cn/problems/plus-one/description/
 
