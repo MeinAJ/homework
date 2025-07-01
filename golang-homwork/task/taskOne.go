@@ -173,7 +173,7 @@ func PlusOne(digits []int) []int {
 
 // RemoveDuplicates 删除有序数组中的重复项 https://leetcode.cn/problems/remove-duplicates-from-sorted-array/description/
 func RemoveDuplicates(nums []int) int {
-	// 思路：当前元素与后面所有元素对比，知道找到不同的元素，记住不同元素的index
+	// 思路：当前元素与后面所有元素对比，知道找到不同的元素，每次循环后beginIndex=beginIndex+1，找到不同元素的作为nextIndex
 	size := findNext(nums, 0, 1, 1)
 	fmt.Println("唯一元素个数：", size)
 	fmt.Println("当前元素：", nums)
