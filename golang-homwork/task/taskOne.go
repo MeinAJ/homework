@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// 只出现一次的数字 https://leetcode.cn/problems/single-number/description/
+// FindNumberOfSingleNumber 只出现一次的数字 https://leetcode.cn/problems/single-number/description/
 func FindNumberOfSingleNumber(nums []int) int {
 	var result = make(map[int]int)
 	if nums != nil && len(nums) > 0 {
@@ -28,7 +28,7 @@ func FindNumberOfSingleNumber(nums []int) int {
 	return 0
 }
 
-// 回文数 https://leetcode.cn/problems/palindrome-number/
+// FindHuiWenShu 回文数 https://leetcode.cn/problems/palindrome-number/
 func FindHuiWenShu(num int) bool {
 	numStr := strconv.Itoa(num)
 	for index, char1 := range numStr {
@@ -44,6 +44,19 @@ func FindHuiWenShu(num int) bool {
 }
 
 // 有效的括号 https://leetcode.cn/problems/valid-parentheses/description/
+func isValid(s string) bool {
+	a := "("
+	b := ")"
+	c := "{"
+	d := "}"
+	e := "["
+	f := "]"
+
+	var arrs = make([]string, len(s))
+	for index, char := range s {
+
+	}
+}
 
 // 最长公共前缀 https://leetcode.cn/problems/longest-common-prefix/description/
 
