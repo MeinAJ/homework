@@ -222,4 +222,16 @@ func Merge(intervals [][]int) [][]int {
 	return result
 }
 
-// 两数之和 https://leetcode.cn/problems/two-sum/description/
+// TwoSum 两数之和 https://leetcode.cn/problems/two-sum/description/
+func TwoSum(nums []int, target int) []int {
+	for i := 0; i < len(nums); i++ {
+		for j := i + 1; j < len(nums); j++ {
+			if nums[i]+nums[j] == target {
+				fmt.Println("两数之和：", i, j)
+				return []int{i, j}
+			}
+		}
+	}
+	fmt.Println("两数之和：nil")
+	return []int{}
+}
