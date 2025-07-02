@@ -35,6 +35,9 @@ func main() {
 	fmt.Println("Multi2WithEveryItemOfSlice：", nums)
 
 	group := sync.WaitGroup{}
+	group.Add(2)
 	task.PrintOddAndEvenFrom0To10(&group)
 	group.Wait()
+
+
 }

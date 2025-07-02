@@ -19,7 +19,6 @@ func Multi2WithEveryItemOfSlice(nums []int) {
 
 // PrintOddAndEvenFrom0To10 编写一个程序，使用 go 关键字启动两个协程，一个协程打印从1到10的奇数，另一个协程打印从2到10的偶数。
 func PrintOddAndEvenFrom0To10(group *sync.WaitGroup) {
-	group.Add(1)
 	go func() {
 		defer group.Done()
 		for i := 1; i < 10; i++ {
@@ -29,7 +28,6 @@ func PrintOddAndEvenFrom0To10(group *sync.WaitGroup) {
 		}
 	}()
 
-	group.Add(1)
 	go func() {
 		defer group.Done()
 		for i := 1; i < 10; i++ {
