@@ -39,5 +39,15 @@ func main() {
 	task.PrintOddAndEvenFrom0To10(&group)
 	group.Wait()
 
+	group = sync.WaitGroup{}
+	group.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer group.Done()
+			task.PrintAsync(i)
+		}()
+	}
+	group.Wait()
+
 
 }

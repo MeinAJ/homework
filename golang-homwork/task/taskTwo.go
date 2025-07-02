@@ -2,8 +2,13 @@ package task
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
+	"time"
 )
+
+// 创建独立的随机数生成器
+var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Add10 编写一个Go程序，定义一个函数，该函数接收一个整数指针作为参数，在函数内部将该指针指向的值增加10，然后在主函数中调用该函数并输出修改后的值。
 func Add10(num *int) {
@@ -39,6 +44,14 @@ func PrintOddAndEvenFrom0To10(group *sync.WaitGroup) {
 }
 
 // 设计一个任务调度器，接收一组任务（可以用函数表示），并使用协程并发执行这些任务，同时统计每个任务的执行时间。
+func PrintAsync(index int) {
+	now := time.Now()
+	// 创建新的随机数生成器
+	sleepTime := time.Duration(rng.Intn(10)+10) * time.Millisecond
+	time.Sleep(sleepTime)
+	fmt.Println("执行任务：", index, "时间耗时", time.Since(now))
+
+}
 
 // 定义一个 Shape 接口，包含 Area() 和 Perimeter() 两个方法。然后创建 Rectangle 和 Circle 结构体，实现 Shape 接口。在主函数中，创建这两个结构体的实例，并调用它们的 Area() 和 Perimeter() 方法。
 
