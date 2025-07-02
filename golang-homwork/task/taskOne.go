@@ -197,6 +197,29 @@ func findNext(nums []int, beginIndex int, nextIndex int, size int) int {
 	return size
 }
 
-// 合并区间 https://leetcode.cn/problems/merge-intervals/description/
+// Merge 合并区间 https://leetcode.cn/problems/merge-intervals/description/
+func Merge(intervals [][]int) [][]int {
+	var result [][]int
+	skipMap := make(map[int]bool)
+	for i := 0; i < len(intervals); i++ {
+		if skipMap[i] {
+			continue
+		}
+		for j := i + 1; j < len(intervals); j++ {
+			small, big := intervals[i][0], intervals[i][1]
+			smallOfNext, bigOfNext := intervals[j][0], intervals[j][1]
+			// 两两值比较,有三种情况。
+			if big >= smallOfNext && bigOfNext >= small {
+				// 存在交集，保留第一个元素，skip第二个元素,合并前后两个元素
+				intervals[i][0] = int(math.Min(float64(small), float64(smallOfNext)))
+				intervals[i][1] = int(math.Max(float64(big), float64(bigOfNext)))
+				skipMap[j] = true
+			}
+		}
+		result = append(result, intervals[i])
+	}
+	fmt.Println("合并后的区间：", result)
+	return result
+}
 
 // 两数之和 https://leetcode.cn/problems/two-sum/description/
