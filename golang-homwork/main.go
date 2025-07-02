@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"golang-homework/task"
+	"sync"
 )
 
 // main方法是程序的入口
@@ -11,6 +13,7 @@ func main() {
 	// 方法名大写开头，表示该方法为公开方法，可以被其他包调用
 	// 方法名小写开头，表示该方法为私有方法，只能在当前包内访问
 
+	// task1
 	task.FindNumberOfSingleNumber([]int{1, 1, 2, 2, 3, 4, 4, 5, 5})
 	task.FindHuiWenShu(212)
 	task.IsValidBrackets("[][][{}]()(){}")
@@ -19,4 +22,19 @@ func main() {
 	task.RemoveDuplicates([]int{0, 1, 2, 3, 3, 3, 3, 5, 6, 6, 7})
 	task.Merge([][]int{{1, 3}, {2, 3}, {3, 5}, {6, 7}})
 	task.TwoSum([]int{1, 2, 3, 4, 5, 6}, 30)
+
+	// task2
+	num := 1
+	fmt.Println("Add10：", num)
+	task.Add10(&num)
+	fmt.Println("Add10：", num)
+
+	nums := []int{1, 2, 3}
+	fmt.Println("Multi2WithEveryItemOfSlice：", nums)
+	task.Multi2WithEveryItemOfSlice(nums)
+	fmt.Println("Multi2WithEveryItemOfSlice：", nums)
+
+	group := sync.WaitGroup{}
+	task.PrintOddAndEvenFrom0To10(&group)
+	group.Wait()
 }
