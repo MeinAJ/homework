@@ -86,6 +86,29 @@ func (c Circle) Perimeter(perimeter float64) float64 {
 }
 
 // 使用组合的方式创建一个 Person 结构体，包含 Name 和 Age 字段，再创建一个 Employee 结构体，组合 Person 结构体并添加 EmployeeID 字段。为 Employee 结构体实现一个 PrintInfo() 方法，输出员工的信息。
+type Person struct {
+	Name string
+	Age  int
+}
+
+type Employee struct {
+	Person     Person
+	EmployeeID string
+}
+
+func (e Employee) PrintInfo() {
+	fmt.Println("EmployeeID：", e.EmployeeID, "，Name：", e.Person.Name, "，Age", e.Person.Age)
+}
+
+func NewEmployee(Name string, Age int, EmployeeID string) *Employee {
+	return &Employee{
+		Person: Person{
+			Name: Name,
+			Age:  Age,
+		},
+		EmployeeID: EmployeeID,
+	}
+}
 
 // 编写一个程序，使用通道实现两个协程之间的通信。一个协程生成从1到10的整数，并将这些整数发送到通道中，另一个协程从通道中接收这些整数并打印出来。
 
