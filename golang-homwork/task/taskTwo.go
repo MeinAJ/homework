@@ -136,7 +136,7 @@ func GoRoutineReact() {
 	waitGroup.Wait()
 }
 
-
+// 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
 func GoRoutineReactWithTimeout() {
 	printChannel := make(chan int, 10)
 	waitGroup := sync.WaitGroup{}
@@ -172,9 +172,23 @@ func GoRoutineReactWithTimeout() {
 	waitGroup.Wait()
 }
 
-// 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
-
-
 // 编写一个程序，使用 sync.Mutex 来保护一个共享的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
-
+func SyncMutexCount() {
+	mutex := sync.Mutex{}
+	count := 0
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(10)
+	for i := 0; i < 10; i++ {
+		go func(inc *int) {
+			mutex.Lock()
+			defer mutex.Unlock()
+			defer waitGroup.Done()
+			for i := 0; i < 1000; i++ {
+				*inc++
+			}
+		}(&count)
+	}
+	waitGroup.Wait()
+	fmt.Print("count:", count)
+}
 // 使用原子操作（ sync/atomic 包）实现一个无锁的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
