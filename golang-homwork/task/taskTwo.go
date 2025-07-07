@@ -49,7 +49,7 @@ func PrintOddAndEvenFrom0To10(group *sync.WaitGroup) {
 func PrintAsync(index int) {
 	now := time.Now()
 	// 创建新的随机数生成器
-	sleepTime := time.Duration(rng.Intn(10)+10) * time.Millisecond
+	sleepTime := time.Duration(rng.Intn(5)+5) * time.Millisecond
 	time.Sleep(sleepTime)
 	fmt.Println("执行任务：", index, "时间耗时", time.Since(now))
 
@@ -203,7 +203,7 @@ func AtomicCounter() {
 		go func(atomicCount *atomic.Int32) {
 			defer waitGroup.Done()
 			for i := 0; i < 1000; i++ {
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(1 * time.Millisecond)
 				atomicCount.Add(1)
 			}
 		}(&atomicCount)

@@ -51,4 +51,6 @@ func main() {
 
 	task.AtomicCounter()
 
+	task.HandleBlog()
+
 }
