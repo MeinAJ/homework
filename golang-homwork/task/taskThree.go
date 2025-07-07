@@ -31,6 +31,9 @@ func GetConnectDB() *sql.DB {
 }
 
 func HandleBlog() {
+
+	fmt.Println("handle blog")
+
 	db := GetConnectDB()
 	defer func(db *sql.DB) {
 		err := db.Close()
@@ -73,7 +76,7 @@ func HandleBlog() {
 	if err != nil {
 		return
 	}
-	fmt.Println("effect rows:", affected)
+	fmt.Println("delete effect rows:", affected)
 
 	// 更新id = 4的文章的标题
 	result, err = db.Exec("update posts set title = ? where id = ?", "new title", 4)
@@ -84,7 +87,7 @@ func HandleBlog() {
 	if err != nil {
 		return
 	}
-	fmt.Println("effect rows:", affected)
+	fmt.Println("update effect rows:", affected)
 
 	// 插入一条id=6的文章
 	result, err = db.Exec("insert into posts(id, title, content, user_id) values(?, ?, ?, ?)", 6, "new title", "new content", 1)
@@ -104,6 +107,57 @@ func HandleBlog() {
 //编写一个事务，实现从账户 A 向账户 B 转账 100 元的操作。在事务中，需要先检查账户 A 的余额是否足够，如果足够则从账户 A 扣除 100 元，向账户 B 增加 100 元，并在 transactions 表中记录该笔转账信息。如果余额不足，则回滚事务。
 
 func HandleTransactions() {
+
+	fmt.Println("handle transactions")
+
+	db := GetConnectDB()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(db)
+
+	ctx, err := db.Begin()
+	if err != nil {
+		return
+	}
+
+	// 事物代码，更新id=1的title，条件title=oldTitle，之后插入一条新的记录id=7，如果更新失败，则回滚事务
+	exec, err := ctx.Exec("update posts set title = ? where id = ? and title = ?", "new title", 1, "old title")
+	if err != nil {
+		_ = ctx.Rollback()
+		return
+	}
+	affected, err := exec.RowsAffected()
+	if err != nil {
+		_ = ctx.Rollback()
+		return
+	}
+	if affected == 0 {
+		_ = ctx.Rollback()
+		return
+	}
+	fmt.Println("update affected:", affected)
+
+	// 插入一条id=7的文章
+	exec, err = ctx.Exec("insert into posts(id, title, content, user_id) values(?, ?, ?, ?)", 7, "new title", "new content", 1)
+	if err != nil {
+		_ = ctx.Rollback()
+		return
+	}
+	id, err := exec.LastInsertId()
+	if err != nil {
+		_ = ctx.Rollback()
+		return
+	}
+	fmt.Println("last insert id:", id)
+
+	commitError := ctx.Commit()
+	if commitError != nil {
+		_ = ctx.Rollback()
+		return
+	}
 
 }
 

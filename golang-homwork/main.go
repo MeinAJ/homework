@@ -53,4 +53,6 @@ func main() {
 
 	task.HandleBlog()
 
+	task.HandleTransactions()
+
 }
