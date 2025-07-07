@@ -9,4 +9,8 @@
 ### 安装各种依赖
 
 go get github.com/go-sql-driver/mysql
+
 go get github.com/jmoiron/sqlx
+
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/mysql
