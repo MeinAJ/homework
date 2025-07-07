@@ -111,8 +111,69 @@ func NewEmployee(Name string, Age int, EmployeeID string) *Employee {
 }
 
 // 编写一个程序，使用通道实现两个协程之间的通信。一个协程生成从1到10的整数，并将这些整数发送到通道中，另一个协程从通道中接收这些整数并打印出来。
+func GoRoutineReact() {
+	printChannel := make(chan int, 10)
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(2)
+	// 先写入
+	go func() {
+		for i := 0; i < 10; i++ {
+			time.Sleep(1 * time.Second)
+			printChannel <- i
+		}
+		// 关闭通道
+		close(printChannel)
+		defer waitGroup.Done()
+
+	}()
+	// 再读出
+	go func() {
+		defer waitGroup.Done()
+		for printInt := range printChannel {
+			fmt.Println("printInt:", printInt, ",time:", time.Now())
+		}
+	}()
+	waitGroup.Wait()
+}
+
+
+func GoRoutineReactWithTimeout() {
+	printChannel := make(chan int, 10)
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(2)
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	// 先写入
+	go func() {
+		defer waitGroup.Done()
+		for i := 0; i < 10; i++ {
+			time.Sleep(200 * time.Millisecond)
+			printChannel <- i
+		}
+		// 关闭通道
+		close(printChannel)
+	}()
+	// 再读出
+	go func() {
+		defer waitGroup.Done()
+		for {
+			select {
+			case dd, ok := <-printChannel:
+				if !ok {
+					fmt.Println("Channel closed")
+					return
+				}
+				fmt.Println("digit number:", dd, ",time:", time.Now())
+			case <-ctx.Done():
+				fmt.Println("time out")
+				return
+			}
+		}
+	}()
+	waitGroup.Wait()
+}
 
 // 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
+
 
 // 编写一个程序，使用 sync.Mutex 来保护一个共享的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
 
