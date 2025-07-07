@@ -1,9 +1,11 @@
 package task
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -85,7 +87,7 @@ func (c Circle) Perimeter(perimeter float64) float64 {
 	return perimeter
 }
 
-// 使用组合的方式创建一个 Person 结构体，包含 Name 和 Age 字段，再创建一个 Employee 结构体，组合 Person 结构体并添加 EmployeeID 字段。为 Employee 结构体实现一个 PrintInfo() 方法，输出员工的信息。
+// Person 使用组合的方式创建一个 Person 结构体，包含 Name 和 Age 字段，再创建一个 Employee 结构体，组合 Person 结构体并添加 EmployeeID 字段。为 Employee 结构体实现一个 PrintInfo() 方法，输出员工的信息。
 type Person struct {
 	Name string
 	Age  int
@@ -110,7 +112,7 @@ func NewEmployee(Name string, Age int, EmployeeID string) *Employee {
 	}
 }
 
-// 编写一个程序，使用通道实现两个协程之间的通信。一个协程生成从1到10的整数，并将这些整数发送到通道中，另一个协程从通道中接收这些整数并打印出来。
+// GoRoutineReact 编写一个程序，使用通道实现两个协程之间的通信。一个协程生成从1到10的整数，并将这些整数发送到通道中，另一个协程从通道中接收这些整数并打印出来。
 func GoRoutineReact() {
 	printChannel := make(chan int, 10)
 	waitGroup := sync.WaitGroup{}
@@ -136,7 +138,7 @@ func GoRoutineReact() {
 	waitGroup.Wait()
 }
 
-// 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
+// GoRoutineReactWithTimeout 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
 func GoRoutineReactWithTimeout() {
 	printChannel := make(chan int, 10)
 	waitGroup := sync.WaitGroup{}
@@ -172,7 +174,7 @@ func GoRoutineReactWithTimeout() {
 	waitGroup.Wait()
 }
 
-// 编写一个程序，使用 sync.Mutex 来保护一个共享的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
+// SyncMutexCount 编写一个程序，使用 sync.Mutex 来保护一个共享的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
 func SyncMutexCount() {
 	mutex := sync.Mutex{}
 	count := 0
@@ -191,9 +193,10 @@ func SyncMutexCount() {
 	waitGroup.Wait()
 	fmt.Print("count:", count)
 }
-// 使用原子操作（ sync/atomic 包）实现一个无锁的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
+
+// AtomicCounter 使用原子操作（ sync/atomic 包）实现一个无锁的计数器。启动10个协程，每个协程对计数器进行1000次递增操作，最后输出计数器的值。
 func AtomicCounter() {
-	atomicCount := atomic.NewInt32(0)
+	atomicCount := atomic.Int32{}
 	waitGroup := sync.WaitGroup{}
 	waitGroup.Add(10)
 	for i := 0; i < 10; i++ {
@@ -201,9 +204,9 @@ func AtomicCounter() {
 			defer waitGroup.Done()
 			for i := 0; i < 1000; i++ {
 				time.Sleep(10 * time.Millisecond)
-				atomicCount.Inc()
+				atomicCount.Add(1)
 			}
-		}(atomicCount)
+		}(&atomicCount)
 	}
 	waitGroup.Wait()
 	fmt.Println("atomicCount：", atomicCount.Load())
