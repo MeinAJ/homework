@@ -60,4 +60,6 @@ func main() {
 
 	task.HandleSqlxComplex()
 
+	task.MigrateGorm()
+
 }
