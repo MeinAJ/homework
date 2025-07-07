@@ -51,8 +51,13 @@ func main() {
 
 	task.AtomicCounter()
 
+	// task 3
 	task.HandleBlog()
 
 	task.HandleTransactions()
+
+	task.HandleSqlx()
+
+	task.HandleSqlxComplex()
 
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -168,11 +169,72 @@ func HandleTransactions() {
 //编写Go代码，使用Sqlx查询 employees 表中所有部门为 "技术部" 的员工信息，并将结果映射到一个自定义的 Employee 结构体切片中。
 //编写Go代码，使用Sqlx查询 employees 表中工资最高的员工信息，并将结果映射到一个 Employee 结构体中。
 
+type Posts struct {
+	Id        int64          `db:"id"`
+	Title     string         `db:"title"`
+	Context   string         `db:"content"`
+	UserId    int64          `db:"user_id"`
+	CreatedAt sql.NullString `db:"created_at"`
+	UpdatedAt sql.NullString `db:"updated_at"`
+	DeletedAt sql.NullString `db:"deleted_at"`
+}
+
+// GetConnectSqlxDB 获取sqlx的db
+func GetConnectSqlxDB() *sqlx.DB {
+	db, err := sqlx.Open("mysql", "root:root@tcp(127.0.0.1:3306)/blog")
+	if err != nil {
+		panic(err)
+	}
+	// ping
+	dbPingErr := db.Ping()
+	if dbPingErr != nil {
+		panic(dbPingErr)
+	}
+	return db
+}
+
+func HandleSqlx() {
+	db := GetConnectSqlxDB()
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(db)
+	posts := &Posts{}
+	err := db.Get(posts, "SELECT * FROM posts WHERE id = ?", 7)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("id:", posts.Id, "title:", posts.Title, "context:", posts.Context, "user_id:",
+		posts.UserId, "created_at:", posts.CreatedAt, "updated_at:", posts.UpdatedAt, "deleted_at:",
+		posts.DeletedAt)
+}
+
 // 题目2：实现类型安全映射
-//假设有一个 books 表，包含字段 id 、 title 、 author 、 price 。
-//要求 ：
-//定义一个 Book 结构体，包含与 books 表对应的字段。
-//编写Go代码，使用Sqlx执行一个复杂的查询，例如查询价格大于 50 元的书籍，并将结果映射到 Book 结构体切片中，确保类型安全。
+// 假设有一个 books 表，包含字段 id 、 title 、 author 、 price 。
+// 要求 ：
+// 定义一个 Book 结构体，包含与 books 表对应的字段。
+// 编写Go代码，使用Sqlx执行一个复杂的查询，例如查询价格大于 50 元的书籍，并将结果映射到 Book 结构体切片中，确保类型安全。
+
+func HandleSqlxComplex() {
+	db := GetConnectSqlxDB()
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(db)
+	var posts []Posts
+	err := db.Select(&posts, "SELECT * FROM posts WHERE id > ?", 1)
+	if err != nil {
+		panic(err)
+	}
+	for _, post := range posts {
+		fmt.Println("id:", post.Id, "title:", post.Title, "context:", post.Context, "user_id:",
+			post.UserId, "created_at:", post.CreatedAt, "updated_at:", post.UpdatedAt, "deleted_at:", post.DeletedAt)
+	}
+}
 
 // 进阶gorm
 //题目1：模型定义

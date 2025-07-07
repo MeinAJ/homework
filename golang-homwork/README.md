@@ -5,3 +5,8 @@
 ### go-zero（grpc、etcd、consul）
 
 ### go-web + go-zero的应用使用dockerfile部署
+
+### 安装各种依赖
+
+go get github.com/go-sql-driver/mysql
+go get github.com/jmoiron/sqlx
