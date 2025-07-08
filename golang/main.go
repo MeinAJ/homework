@@ -52,16 +52,17 @@ func main() {
 	task.AtomicCounter()
 
 	// task 3
-	task.HandleBlog()
+	//task.HandleBlog()
+	//
+	//task.HandleTransactions()
+	//
+	//task.HandleSqlx()
+	//
+	//task.HandleSqlxComplex()
+	//
+	//task.MigrateGorm()
+	//
+	//task.GormQuery()
 
-	task.HandleTransactions()
-
-	task.HandleSqlx()
-
-	task.HandleSqlxComplex()
-
-	task.MigrateGorm()
-
-	task.GormQuery()
-
+	task.GormHook()
 }

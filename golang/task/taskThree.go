@@ -8,8 +8,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+	"log"
 	"time"
 )
 
@@ -277,17 +279,20 @@ type GormUsers struct {
 	CreatedTime sql.NullString `gorm:"column:created_time"`
 	UpdatedTime sql.NullString `gorm:"column:updated_time"`
 	DeletedTime sql.NullString `gorm:"column:deleted_time"`
+	PostCount   int64          `gorm:"column:post_count"`
 }
 
 type GormPosts struct { // 文章
-	Id           int64          `gorm:"column:id;primary_key"`
-	Title        string         `gorm:"column:title"`
-	Content      string         `gorm:"column:content"`
-	UserId       int64          `gorm:"column:user_id"`
-	CreatedTime  sql.NullString `gorm:"column:created_time"`
-	UpdatedTime  sql.NullString `gorm:"column:updated_time"`
-	DeletedTime  sql.NullString `gorm:"column:deleted_time"`
-	GormComments []GormComments `gorm:"-"`
+	Id            int64          `gorm:"column:id;primary_key"`
+	Title         string         `gorm:"column:title"`
+	Content       string         `gorm:"column:content"`
+	UserId        int64          `gorm:"column:user_id"`
+	CreatedTime   sql.NullString `gorm:"column:created_time"`
+	UpdatedTime   sql.NullString `gorm:"column:updated_time"`
+	DeletedTime   sql.NullString `gorm:"column:deleted_time"`
+	GormComments  []GormComments `gorm:"-"`
+	CommentCount  int64          `gorm:"column:comment_count"`
+	CommentStatus int64          `gorm:"column:comment_status"`
 }
 
 type GormComments struct {
@@ -357,7 +362,117 @@ func GormQuery() {
 }
 
 // 题目3：钩子函数
-//继续使用博客系统的模型。
-//要求 ：
-//为 Post 模型添加一个钩子函数，在文章创建时自动更新用户的文章数量统计字段。
-//为 Comment 模型添加一个钩子函数，在评论删除时检查文章的评论数量，如果评论数量为 0，则更新文章的评论状态为 "无评论"。
+// 继续使用博客系统的模型。
+// 要求 ：
+// 为 Post 模型添加一个钩子函数，在文章创建时自动更新用户的文章数量统计字段。
+// 为 Comment 模型添加一个钩子函数，在评论删除时检查文章的评论数量，如果评论数量为 0，则更新文章的评论状态为 "无评论"。
+
+func GormHook() {
+	db := MigrateGorm()
+
+	// 修正钩子注册位置
+	if err := db.Callback().Create().After("gorm:create").Register("update_user_post_count", updateUserPostCount); err != nil {
+		log.Fatalf("注册创建钩子失败: %v", err)
+	}
+
+	// 修正钩子注册位置并处理批量删除
+	if err := db.Callback().Delete().After("gorm:delete").Register("update_post_comment_status", updatePostCommentStatus); err != nil {
+		log.Fatalf("注册删除钩子失败: %v", err)
+	}
+
+	// 示例操作
+	gormPost := GormPosts{
+		Title:   "GormHook title",
+		Content: "GormHook content",
+		UserId:  1,
+	}
+
+	// 使用事务确保数据一致性
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// 创建
+		if err := tx.Create(&gormPost).Error; err != nil {
+			return err
+		}
+
+		// 删除
+		if err := tx.Where("id = ?", 1).Delete(&GormComments{}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("操作失败: %v", err)
+	}
+}
+
+// 使用原子操作避免并发问题
+func updateUserPostCount(db *gorm.DB) {
+	if db.Error != nil {
+		return
+	}
+
+	// 安全类型检查
+	model, ok := db.Statement.Dest.(*GormPosts)
+	if !ok || model == nil {
+		return
+	}
+
+	// 原子更新
+	err := db.Model(&GormUsers{}).
+		Where("id = ?", model.UserId).
+		Update("post_count", gorm.Expr("post_count + 1")).
+		Error
+
+	if err != nil {
+		db.AddError(err)
+	}
+}
+
+// 处理批量删除和并发问题
+func updatePostCommentStatus(db *gorm.DB) {
+	if db.Error != nil {
+		return
+	}
+
+	// 处理批量删除
+	switch dest := db.Statement.Dest.(type) {
+	case *GormComments:
+		processComment(db, dest)
+	case []*GormComments:
+		for _, c := range dest {
+			processComment(db, c)
+		}
+	}
+}
+
+func processComment(tx *gorm.DB, comment *GormComments) {
+	// 使用行锁确保数据一致性
+	var post GormPosts
+	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		First(&post, "id = ?", comment.PostId).
+		Error
+
+	if err != nil {
+		tx.AddError(err)
+		return
+	}
+
+	// 原子更新
+	updateData := map[string]interface{}{
+		"comment_count": gorm.Expr("comment_count - 1"),
+	}
+
+	if post.CommentCount-1 <= 0 {
+		updateData["comment_status"] = 0
+	}
+
+	err = tx.Model(&GormPosts{}).
+		Where("id = ?", comment.PostId).
+		Updates(updateData).
+		Error
+
+	if err != nil {
+		tx.AddError(err)
+	}
+}
