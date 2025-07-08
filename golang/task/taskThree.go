@@ -303,6 +303,37 @@ type GormComments struct {
 //编写Go代码，使用Gorm查询某个用户发布的所有文章及其对应的评论信息。
 //编写Go代码，使用Gorm查询评论数量最多的文章信息。
 
+func GormQuery() {
+
+	db := MigrateGorm()
+	var gormPosts []GormPosts
+	// 某个用户发布的所有文章
+	db.Select("*").Where("user_id = ?", 1).Find(&gormPosts)
+	var postIds []int64
+	fmt.Println("Gorm multi Query")
+	for _, gormPost := range gormPosts {
+		fmt.Println("id:", gormPost.Id, "title:", gormPost.Title, "content:", gormPost.Content,
+			"userId:", gormPost.UserId, "createdTime:", gormPost.CreatedTime.String,
+			"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime.String)
+		postIds = append(postIds, gormPost.Id)
+	}
+	// 及其对应的评论信息
+	var gormComments = []GormComments{}
+	var postIdAndCommentMap = make(map[int64][]GormComments)
+	db.Select("*").Where("post_id in ?", postIds).Find(&gormComments)
+	for _, gormComment := range gormComments {
+		fmt.Println("id", gormComment.Id, "content:", gormComment.Content, "postId:", gormComment.PostId,
+			"createdTime:", gormComment.CreatedTime.String, "updatedTime:", gormComment.UpdatedTime.String,
+			"deletedTime:", gormComment.DeletedTime.String)
+		postIdAndCommentMap[gormComment.PostId] = append(postIdAndCommentMap[gormComment.PostId], gormComment)
+	}
+	// 组合数据
+	for index, gormPost := range gormPosts {
+		gormPosts[index].GormComments = postIdAndCommentMap[gormPost.Id]
+	}
+	fmt.Println("postIdAndCommentMap:", postIdAndCommentMap)
+}
+
 // 题目3：钩子函数
 //继续使用博客系统的模型。
 //要求 ：
