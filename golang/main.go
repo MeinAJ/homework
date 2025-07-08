@@ -62,4 +62,6 @@ func main() {
 
 	task.MigrateGorm()
 
+	task.GormQuery()
+
 }

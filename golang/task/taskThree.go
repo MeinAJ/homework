@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"time"
 )
@@ -249,6 +250,7 @@ func HandleSqlxComplex() {
 func MigrateGorm() *gorm.DB { // 连接数据库
 	dsn := "root:root@tcp(127.0.0.1:3306)/blog?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger:                                   logger.Default.LogMode(logger.Info),
 		DisableForeignKeyConstraintWhenMigrating: true,
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -278,13 +280,14 @@ type GormUsers struct {
 }
 
 type GormPosts struct { // 文章
-	Id          int64          `gorm:"column:id;primary_key"`
-	Title       string         `gorm:"column:title"`
-	Content     string         `gorm:"column:content"`
-	UserId      int64          `gorm:"column:user_id"`
-	CreatedTime sql.NullString `gorm:"column:created_time"`
-	UpdatedTime sql.NullString `gorm:"column:updated_time"`
-	DeletedTime sql.NullString `gorm:"column:deleted_time"`
+	Id           int64          `gorm:"column:id;primary_key"`
+	Title        string         `gorm:"column:title"`
+	Content      string         `gorm:"column:content"`
+	UserId       int64          `gorm:"column:user_id"`
+	CreatedTime  sql.NullString `gorm:"column:created_time"`
+	UpdatedTime  sql.NullString `gorm:"column:updated_time"`
+	DeletedTime  sql.NullString `gorm:"column:deleted_time"`
+	GormComments []GormComments `gorm:"-"`
 }
 
 type GormComments struct {
@@ -295,6 +298,11 @@ type GormComments struct {
 	CreatedTime sql.NullString `gorm:"column:created_time"`
 	UpdatedTime sql.NullString `gorm:"column:updated_time"`
 	DeletedTime sql.NullString `gorm:"column:deleted_time"`
+}
+
+type IdCount struct {
+	PostId int64
+	Count  int64
 }
 
 // 题目2：关联查询
@@ -318,7 +326,7 @@ func GormQuery() {
 		postIds = append(postIds, gormPost.Id)
 	}
 	// 及其对应的评论信息
-	var gormComments = []GormComments{}
+	var gormComments []GormComments
 	var postIdAndCommentMap = make(map[int64][]GormComments)
 	db.Select("*").Where("post_id in ?", postIds).Find(&gormComments)
 	for _, gormComment := range gormComments {
@@ -332,6 +340,20 @@ func GormQuery() {
 		gormPosts[index].GormComments = postIdAndCommentMap[gormPost.Id]
 	}
 	fmt.Println("postIdAndCommentMap:", postIdAndCommentMap)
+
+	// 评论数量最多的文章信息
+	var idCount IdCount
+	db.Table("gorm_comments").Select("post_id, COUNT(*) as count").Group("post_id").
+		Order("count DESC").Limit(1).Scan(&idCount)
+	fmt.Println("post_id:", idCount.PostId, "count:", idCount.Count)
+
+	// 找到了评论数量最多的文章，查询出文章信息
+	var gormPost GormPosts
+	db.Where("id = ?", idCount.PostId).First(&gormPost)
+	fmt.Println("postId:", gormPost.Id, "title:", gormPost.Title, "content:", gormPost.Content,
+		"userId:", gormPost.UserId, "createdTime:", gormPost.CreatedTime.String,
+		"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime.String)
+
 }
 
 // 题目3：钩子函数
