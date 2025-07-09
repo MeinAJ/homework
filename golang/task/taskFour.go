@@ -5,6 +5,12 @@ package task
 //创建一个新的 Go 项目，使用 go mod init 初始化项目依赖管理。
 //安装必要的库，如 Gin 框架、GORM 以及数据库驱动（如 MySQL 或 SQLite）。
 
+// 命令行执行：
+// go mod init blog
+// go get -u github.com/gin-gonic/gin
+// go get -u gorm.io/gorm
+// go get -u gorm.io/driver/mysql
+
 //2、数据库设计与模型定义
 //设计数据库表结构，至少包含以下几个表：
 //users 表：存储用户信息，包括 id 、 username 、 password 、 email 等字段。
