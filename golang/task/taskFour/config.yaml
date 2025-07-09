@@ -1,0 +1,16 @@
+server:
+#  port: "8080"
+  port: "8081"
+
+database:
+  dsn: "root:root@tcp(127.0.0.1:3306)/blog?charset=utf8mb4&parseTime=True&loc=Local"
+  max_idle_connections: 10
+  max_open_connections: 100
+  connection_max_lifetime: 10
+
+log:
+  level: "debug"
+  filename: "logs/app.log"
+  max_size: 100
+  max_age: 30
+  max_backups: 10

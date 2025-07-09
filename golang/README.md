@@ -16,3 +16,9 @@ go get -u gorm.io/gorm
 go get -u gorm.io/driver/mysql
 
 go get -u github.com/gin-gonic/gin
+
+# taskOne：golang基础语法
+# taskTwo：golang进阶语法
+# taskThree：golang gorm框架使用
+# taskFour：golang web开发gin，gorm框架使用
+# taskFour：golang go-zero框架使用
