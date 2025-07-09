@@ -369,110 +369,36 @@ func GormQuery() {
 
 func GormHook() {
 	db := MigrateGorm()
-
-	// 修正钩子注册位置
-	if err := db.Callback().Create().After("gorm:create").Register("update_user_post_count", updateUserPostCount); err != nil {
-		log.Fatalf("注册创建钩子失败: %v", err)
-	}
-
-	// 修正钩子注册位置并处理批量删除
-	if err := db.Callback().Delete().After("gorm:delete").Register("update_post_comment_status", updatePostCommentStatus); err != nil {
-		log.Fatalf("注册删除钩子失败: %v", err)
-	}
-
-	// 示例操作
-	gormPost := GormPosts{
-		Title:   "GormHook title",
-		Content: "GormHook content",
+	// 创建文章（自动触发用户计数更新）
+	newPost := GormPosts{
 		UserId:  1,
+		Title:   "GORM Hooks",
+		Content: "...",
 	}
-
-	// 使用事务确保数据一致性
-	err := db.Transaction(func(tx *gorm.DB) error {
-		// 创建
-		if err := tx.Create(&gormPost).Error; err != nil {
-			return err
-		}
-
-		// 删除
-		if err := tx.Where("id = ?", 1).Delete(&GormComments{}).Error; err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err != nil {
-		log.Printf("操作失败: %v", err)
-	}
+	db.Create(&newPost)
+	// 删除评论（自动触发状态更新）
+	db.Delete(&GormComments{Id: 2, PostId: 2, UserId: 2})
 }
 
-// 使用原子操作避免并发问题
-func updateUserPostCount(db *gorm.DB) {
-	if db.Error != nil {
-		return
-	}
-
-	// 安全类型检查
-	model, ok := db.Statement.Dest.(*GormPosts)
-	if !ok || model == nil {
-		return
-	}
-
-	// 原子更新
-	err := db.Model(&GormUsers{}).
-		Where("id = ?", model.UserId).
-		Update("post_count", gorm.Expr("post_count + 1")).
-		Error
-
-	if err != nil {
-		db.AddError(err)
-	}
+// AfterCreate 文章创建后的钩子函数
+func (p *GormPosts) AfterCreate(tx *gorm.DB) (err error) {
+	// 更新相应用户的文章数量
+	result := tx.Model(&GormUsers{}).Where("id = ?", p.UserId).
+		Update("posts_count", gorm.Expr("posts_count + ?", 1))
+	return result.Error
 }
 
-// 处理批量删除和并发问题
-func updatePostCommentStatus(db *gorm.DB) {
-	if db.Error != nil {
-		return
+// AfterDelete 评论删除后的钩子函数
+func (c *GormComments) AfterDelete(tx *gorm.DB) (err error) {
+	// 检查当前文章的剩余评论数量
+	var count int64
+	tx.Model(&GormComments{}).Where("post_id = ?", c.PostId).Count(&count)
+
+	// 如果评论数为0，更新文章状态
+	if count == 0 {
+		result := tx.Model(&GormPosts{}).Where("id = ?", c.PostId).
+			Update("comment_status", 0)
+		return result.Error
 	}
-
-	// 处理批量删除
-	switch dest := db.Statement.Dest.(type) {
-	case *GormComments:
-		processComment(db, dest)
-	case []*GormComments:
-		for _, c := range dest {
-			processComment(db, c)
-		}
-	}
-}
-
-func processComment(tx *gorm.DB, comment *GormComments) {
-	// 使用行锁确保数据一致性
-	var post GormPosts
-	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-		First(&post, "id = ?", comment.PostId).
-		Error
-
-	if err != nil {
-		tx.AddError(err)
-		return
-	}
-
-	// 原子更新
-	updateData := map[string]interface{}{
-		"comment_count": gorm.Expr("comment_count - 1"),
-	}
-
-	if post.CommentCount-1 <= 0 {
-		updateData["comment_status"] = 0
-	}
-
-	err = tx.Model(&GormPosts{}).
-		Where("id = ?", comment.PostId).
-		Updates(updateData).
-		Error
-
-	if err != nil {
-		tx.AddError(err)
-	}
+	return nil
 }
