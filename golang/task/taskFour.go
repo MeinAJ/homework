@@ -18,65 +18,6 @@ package task
 //comments 表：存储文章评论信息，包括 id 、 content 、 user_id （关联 users 表的 id ）、 post_id （关联 posts 表的 id ）、 created_at 等字段。
 //使用 GORM 定义对应的 Go 模型结构体。
 
-func GetGormBlogDb() *gorm.DB { // 连接数据库
-	dsn := "root:R7f*tJm5@tcp(10.113.75.118:3309)/blog?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger:                                   logger.Default.LogMode(logger.Info),
-		DisableForeignKeyConstraintWhenMigrating: true,
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
-	// 自动迁移
-	err = db.AutoMigrate(&GormUsers{}, &GormPosts{}, &GormComments{})
-	if err != nil {
-		panic(err)
-	}
-	return db
-}
-
-type GormUsers struct {
-	Id          int64          `gorm:"column:id;primary_key"`
-	Username    string         `gorm:"column:username"`
-	Password    string         `gorm:"column:password"`
-	Email       string         `gorm:"column:email"`
-	CreatedTime time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
-	UpdatedTime time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
-	DeletedTime gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
-	PostCount   int64          `gorm:"column:post_count"`
-}
-
-type GormPosts struct { // 文章
-	Id            int64          `gorm:"column:id;primary_key"`
-	Title         string         `gorm:"column:title"`
-	Content       string         `gorm:"column:content"`
-	UserId        int64          `gorm:"column:user_id"`
-	CreatedTime   time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
-	UpdatedTime   time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
-	DeletedTime   gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
-	GormComments  []GormComments `gorm:"-"`
-	CommentCount  int64          `gorm:"column:comment_count"`
-	CommentStatus int64          `gorm:"column:comment_status"`
-}
-
-type GormComments struct {
-	Id          int64          `gorm:"column:id;primary_key"`
-	Content     string         `gorm:"column:content"`
-	PostId      int64          `gorm:"column:post_id"`
-	UserId      int64          `gorm:"column:user_id"`
-	CreatedTime time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
-	UpdatedTime time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
-	DeletedTime gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
-}
-
-type IdCount struct {
-	PostId int64
-	Count  int64
-}
-
 //3、用户认证与授权
 //实现用户注册和登录功能，用户注册时需要对密码进行加密存储，登录时验证用户输入的用户名和密码。
 //使用 JWT（JSON Web Token）实现用户认证和授权，用户登录成功后返回一个 JWT，后续的需要认证的接口需要验证该 JWT 的有效性。

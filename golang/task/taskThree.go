@@ -8,10 +8,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"log"
 	"time"
 )
 
@@ -276,9 +274,9 @@ type GormUsers struct {
 	Username    string         `gorm:"column:username"`
 	Password    string         `gorm:"column:password"`
 	Email       string         `gorm:"column:email"`
-	CreatedTime sql.NullString `gorm:"column:created_time"`
-	UpdatedTime sql.NullString `gorm:"column:updated_time"`
-	DeletedTime sql.NullString `gorm:"column:deleted_time"`
+	CreatedTime time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
+	UpdatedTime time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
+	DeletedTime gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
 	PostCount   int64          `gorm:"column:post_count"`
 }
 
@@ -287,9 +285,9 @@ type GormPosts struct { // 文章
 	Title         string         `gorm:"column:title"`
 	Content       string         `gorm:"column:content"`
 	UserId        int64          `gorm:"column:user_id"`
-	CreatedTime   sql.NullString `gorm:"column:created_time"`
-	UpdatedTime   sql.NullString `gorm:"column:updated_time"`
-	DeletedTime   sql.NullString `gorm:"column:deleted_time"`
+	CreatedTime   time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
+	UpdatedTime   time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
+	DeletedTime   gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
 	GormComments  []GormComments `gorm:"-"`
 	CommentCount  int64          `gorm:"column:comment_count"`
 	CommentStatus int64          `gorm:"column:comment_status"`
@@ -300,9 +298,9 @@ type GormComments struct {
 	Content     string         `gorm:"column:content"`
 	PostId      int64          `gorm:"column:post_id"`
 	UserId      int64          `gorm:"column:user_id"`
-	CreatedTime sql.NullString `gorm:"column:created_time"`
-	UpdatedTime sql.NullString `gorm:"column:updated_time"`
-	DeletedTime sql.NullString `gorm:"column:deleted_time"`
+	CreatedTime time.Time      `gorm:"type:datetime(3);gorm:column:created_time"` // MySQL 毫秒精度
+	UpdatedTime time.Time      `gorm:"type:datetime(3);gorm:column:updated_time"` // MySQL 毫秒精度
+	DeletedTime gorm.DeletedAt `gorm:"type:datetime(3);gorm:column:deleted_time"` // MySQL 毫秒精度
 }
 
 type IdCount struct {
@@ -327,7 +325,7 @@ func GormQuery() {
 	for _, gormPost := range gormPosts {
 		fmt.Println("id:", gormPost.Id, "title:", gormPost.Title, "content:", gormPost.Content,
 			"userId:", gormPost.UserId, "createdTime:", gormPost.CreatedTime.String,
-			"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime.String)
+			"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime)
 		postIds = append(postIds, gormPost.Id)
 	}
 	// 及其对应的评论信息
@@ -336,8 +334,8 @@ func GormQuery() {
 	db.Select("*").Where("post_id in ?", postIds).Find(&gormComments)
 	for _, gormComment := range gormComments {
 		fmt.Println("id", gormComment.Id, "content:", gormComment.Content, "postId:", gormComment.PostId,
-			"createdTime:", gormComment.CreatedTime.String, "updatedTime:", gormComment.UpdatedTime.String,
-			"deletedTime:", gormComment.DeletedTime.String)
+			"createdTime:", gormComment.CreatedTime, "updatedTime:", gormComment.UpdatedTime.String,
+			"deletedTime:", gormComment.DeletedTime)
 		postIdAndCommentMap[gormComment.PostId] = append(postIdAndCommentMap[gormComment.PostId], gormComment)
 	}
 	// 组合数据
@@ -357,7 +355,7 @@ func GormQuery() {
 	db.Where("id = ?", idCount.PostId).First(&gormPost)
 	fmt.Println("postId:", gormPost.Id, "title:", gormPost.Title, "content:", gormPost.Content,
 		"userId:", gormPost.UserId, "createdTime:", gormPost.CreatedTime.String,
-		"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime.String)
+		"updatedTime:", gormPost.UpdatedTime.String, "deletedTime:", gormPost.DeletedTime)
 
 }
 
