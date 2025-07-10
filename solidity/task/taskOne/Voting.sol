@@ -7,49 +7,42 @@ pragma solidity ^0.8.28;
 //一个getVotes函数，返回某个候选人的得票数
 //一个resetVotes函数，重置所有候选人的得票数
 contract Voting {
-
-    //一个mapping来存储候选人的得票数
     mapping(address => uint64) public votes;
     mapping(address => bool) public voteStatus;
     address[] public candidates;
     address public owner;
 
-    constructor(address _owner){
+    constructor(address _owner) {
         owner = _owner;
     }
 
-    //一个vote函数，允许用户投票给某个候选人，限制每个用户只能投一次
     function vote(address candidate) public {
-        if (voteStatus[msg.sender] == false) {
-            voteStatus[msg.sender] = true;
-            votes[candidate] += 1;
-            if (votes[candidate] > 0) {
-                candidates.push(candidate);
-            }
+        require(!voteStatus[msg.sender], "Already voted");
+        voteStatus[msg.sender] = true;
+        // 仅在候选人首次被投票时加入数组
+        if (votes[candidate] == 0) {
+            candidates.push(candidate);
         }
+        votes[candidate] += 1;
     }
 
-    //一个getVotes函数，返回某个候选人的得票数
-    function getVotes(address candidate) public view returns (int64) {
-        if (votes[candidate] > 0) {
-            return votes[candidate];
-        } else {
-            return 0;
-        }
+    function getVotes(address candidate) public view returns (uint64) {
+        //直接返回 mapping 值（默认返回0）
+        return votes[candidate];
     }
 
-    //一个resetVotes函数，重置所有候选人的得票数
-    //只能由owner调用
     function resetVotes() public {
         _checkOnlyOwner();
-        for (uint i = 0; i < candidates.length; i++) {
+        // 仅重置数组中的候选人票数
+        for (uint i = 0; i < candidates.length;) {
             votes[candidates[i]] = 0;
+            unchecked {++i;} // 禁用溢出检查节省 gas
         }
+        // 清空数组但保留分配的内存 (更省 gas)
         delete candidates;
     }
 
     function _checkOnlyOwner() internal view {
-        require(msg.sender == owner, "Only owner can call 'resetVotes()' function");
+        require(msg.sender == owner, "Only owner");
     }
-
 }
