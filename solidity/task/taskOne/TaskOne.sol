@@ -67,6 +67,12 @@ contract ReverseStringContract {
 
 // ✅  用 solidity 实现整数转罗马数字
 //题目描述在 https://leetcode.cn/problems/roman-to-integer/description/3.
+//todo
+
+
+// ✅  用 solidity 实现罗马数字转数整数
+//题目描述在 https://leetcode.cn/problems/integer-to-roman/description/
+
 contract RomanNumberConvert2IntContract {
     function RomanNumberConvert2Int(string memory str) public pure returns (uint64) {
         if (str == "") {
@@ -80,61 +86,52 @@ contract RomanNumberConvert2IntContract {
         for (uint i = 0; i < originalBytes.length;) {
             // 判断是否当前元素后面是否还有
             if (skip) {
+                skip = false;
                 unchecked {i++;}
                 continue;
             }
+            string memory tmpStr = "";
             if (i + 1 < originalBytes.length) {
-                string memory tmpStr = string([originalBytes[i], originalBytes[i + 1]]);
-                if (tmpStr == "IV") {
-                    // 等于4
-                    result += 4;
-                    skip = true;
-                } else if (tmpStr == "IX") {
-                    // 等于9
-                    result += 9;
-                    skip = true;
-                } else if (tmpStr == "XL") {
-                    // 等于40
-                    result += 40;
-                    skip = true;
-                } else if (tmpStr == "XC") {
-                    // 等于90
-                    result += 90;
-                    skip = true;
-                } else if (tmpStr == "CD") {
-                    // 等于400
-                    result += 400;
-                    skip = true;
-                } else if (tmpStr == "CM") {
-                    // 等于900
-                    result += 900;
-                    skip = true;
-                } else {
-                    result += GetSingleInt(string([originalBytes[i]]));
-                }
+                tmpStr = string([originalBytes[i], originalBytes[i + 1]]);
             } else {
-                result += GetSingleInt(string([originalBytes[i]]));
+                tmpStr = string([originalBytes[i]]);
             }
+            (uint num bool _skip) = _getInt(tmpStr);
+            skip = _skip;
+            result += num;
+            skip = false;
             unchecked {i++;}
         }
         return 0;
     }
 
-    function GetSingleInt(string memory str) internal pure returns (uint64) {
+    function _getInt(string memory str) internal pure returns (uint64, bool) {
         if (str == "I") {
-            return 1;
+            return (1, false);
         } else if (str == "V") {
-            return 5;
+            return (5, false);
         } else if (str == "X") {
-            return 10;
+            return (10, false);
         } else if (str == "L") {
-            return 50;
+            return (50, false);
         } else if (str == "C") {
-            return 100;
+            return (100, false);
         } else if (str == "D") {
-            return 500;
+            return (500, false);
         } else if (str == "M") {
-            return 1000;
+            return (1000, false);
+        } else if (str == "IV") {
+            return (4, true);
+        } else if (str == "IX") {
+            return (9, true);
+        } else if (str == "XL") {
+            return (40, true);
+        } else if (str == "XC") {
+            return (90, true);
+        } else if (str == "CD") {
+            return (400, true);
+        } else if (str == "CM") {
+            return (900, true);
         }
         require(false, "invalid roman number");
         return 0;
