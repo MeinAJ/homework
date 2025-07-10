@@ -57,8 +57,9 @@ contract ReverseStringContract {
         // 这种只是针对ascii字符的反转，对于中文等其他字符的处理需要更复杂的算法
         bytes memory originalBytes = bytes(str);
         bytes memory reversedBytes = new bytes(originalBytes.length);
-        for (uint i = 0; i < originalBytes.length; i++) {
+        for (uint i = 0; i < originalBytes.length;) {
             reversedBytes[i] = originalBytes[originalBytes.length - 1 - i];
+            unchecked {i++;}
         }
         return string(reversedBytes);
     }
@@ -72,9 +73,70 @@ contract RomanNumberConvert2IntContract {
             return 0;
         }
         uint64 result = 0;
-        // 先转成bytes数组
+        // 1、先转成bytes数组
+        // 2、判断第一个数和第二个数是否成对，要么是一个，要么是两个，记录位数+1
         bytes memory originalBytes = bytes(str);
+        bool skip = false;
+        for (uint i = 0; i < originalBytes.length;) {
+            // 判断是否当前元素后面是否还有
+            if (skip) {
+                unchecked {i++;}
+                continue;
+            }
+            if (i + 1 < originalBytes.length) {
+                string memory tmpStr = string([originalBytes[i], originalBytes[i + 1]]);
+                if (tmpStr == "IV") {
+                    // 等于4
+                    result += 4;
+                    skip = true;
+                } else if (tmpStr == "IX") {
+                    // 等于9
+                    result += 9;
+                    skip = true;
+                } else if (tmpStr == "XL") {
+                    // 等于40
+                    result += 40;
+                    skip = true;
+                } else if (tmpStr == "XC") {
+                    // 等于90
+                    result += 90;
+                    skip = true;
+                } else if (tmpStr == "CD") {
+                    // 等于400
+                    result += 400;
+                    skip = true;
+                } else if (tmpStr == "CM") {
+                    // 等于900
+                    result += 900;
+                    skip = true;
+                } else {
+                    result += GetSingleInt(string([originalBytes[i]]));
+                }
+            } else {
+                result += GetSingleInt(string([originalBytes[i]]));
+            }
+            unchecked {i++;}
+        }
+        return 0;
+    }
 
+    function GetSingleInt(string memory str) internal pure returns (uint64) {
+        if (str == "I") {
+            return 1;
+        } else if (str == "V") {
+            return 5;
+        } else if (str == "X") {
+            return 10;
+        } else if (str == "L") {
+            return 50;
+        } else if (str == "C") {
+            return 100;
+        } else if (str == "D") {
+            return 500;
+        } else if (str == "M") {
+            return 1000;
+        }
+        require(false, "invalid roman number");
         return 0;
     }
 }
