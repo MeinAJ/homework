@@ -1,4 +1,4 @@
-package task
+package taskTwo
 
 // 作业 1：ERC20 代币
 //任务：参考 openzeppelin-contracts/contracts/token/ERC20/IERC20.sol实现一个简单的 ERC20 代币合约。要求：

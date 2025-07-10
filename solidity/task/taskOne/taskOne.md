@@ -1,4 +1,4 @@
-package task
+package taskOne
 
 // ✅ 创建一个名为Voting的合约，包含以下功能：
 //一个mapping来存储候选人的得票数
