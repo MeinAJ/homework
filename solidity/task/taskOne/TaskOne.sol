@@ -67,73 +67,105 @@ contract ReverseStringContract {
 
 // ✅  用 solidity 实现整数转罗马数字
 //题目描述在 https://leetcode.cn/problems/roman-to-integer/description/3.
-//todo
+contract IntegerToRoman {
+    // 定义罗马数字符号和对应的值（按从大到小排序）
+    struct RomanNumeral {
+        uint256 value;
+        string symbol;
+    }
+    
+    RomanNumeral[] private romanNumerals;
+
+    constructor() {
+        // 初始化罗马数字符号表（必须按值从大到小排序）
+        romanNumerals.push(RomanNumeral(1000, "M"));
+        romanNumerals.push(RomanNumeral(900, "CM"));
+        romanNumerals.push(RomanNumeral(500, "D"));
+        romanNumerals.push(RomanNumeral(400, "CD"));
+        romanNumerals.push(RomanNumeral(100, "C"));
+        romanNumerals.push(RomanNumeral(90, "XC"));
+        romanNumerals.push(RomanNumeral(50, "L"));
+        romanNumerals.push(RomanNumeral(40, "XL"));
+        romanNumerals.push(RomanNumeral(10, "X"));
+        romanNumerals.push(RomanNumeral(9, "IX"));
+        romanNumerals.push(RomanNumeral(5, "V"));
+        romanNumerals.push(RomanNumeral(4, "IV"));
+        romanNumerals.push(RomanNumeral(1, "I"));
+    }
+
+    function intToRoman(uint256 num) public pure returns (string memory) {
+        // 参数检查
+        require(num > 0 && num < 4000, "Number must be between 1 and 3999");
+        
+        // 预定义罗马数字符号表（按值从大到小排序）
+        RomanNumeral[13] memory numerals = [
+            RomanNumeral(1000, "M"),
+            RomanNumeral(900, "CM"),
+            RomanNumeral(500, "D"),
+            RomanNumeral(400, "CD"),
+            RomanNumeral(100, "C"),
+            RomanNumeral(90, "XC"),
+            RomanNumeral(50, "L"),
+            RomanNumeral(40, "XL"),
+            RomanNumeral(10, "X"),
+            RomanNumeral(9, "IX"),
+            RomanNumeral(5, "V"),
+            RomanNumeral(4, "IV"),
+            RomanNumeral(1, "I")
+        ];
+        
+        // 构建罗马数字字符串
+        bytes memory roman;
+        for (uint256 i = 0; i < numerals.length; i++) {
+            while (num >= numerals[i].value) {
+                roman = abi.encodePacked(roman, numerals[i].symbol);
+                num -= numerals[i].value;
+            }
+        }
+        
+        return string(roman);
+    }
+}
 
 
 // ✅  用 solidity 实现罗马数字转数整数
 //题目描述在 https://leetcode.cn/problems/integer-to-roman/description/
 
 contract RomanNumberConvert2IntContract {
+    error InvalidRomanCharacter();
     function RomanNumberConvert2Int(string memory str) public pure returns (uint64) {
-        if (str == "") {
-            return 0;
-        }
+        bytes memory roman = bytes(str);
+        uint256 len = roman.length;
         uint64 result = 0;
-        // 1、先转成bytes数组
-        // 2、判断第一个数和第二个数是否成对，要么是一个，要么是两个，记录位数+1
-        bytes memory originalBytes = bytes(str);
-        bool skip = false;
-        for (uint i = 0; i < originalBytes.length;) {
-            // 判断是否当前元素后面是否还有
-            if (skip) {
-                skip = false;
-                unchecked {i++;}
-                continue;
+        uint64 current;
+        uint64 next;
+        for (uint256 i = 0; i < len; ) {
+            current = _charToUint(roman[i]);
+            // 检查是否有下一个字符
+            if (i + 1 < len) {
+                next = _charToUint(roman[i + 1]);
+                // 组合数字规则：小值在左表示减法
+                if (current < next) {
+                    result += (next - current);
+                    unchecked { i += 2; } // 跳过两个字符
+                    continue;
+                }
             }
-            string memory tmpStr = "";
-            if (i + 1 < originalBytes.length) {
-                tmpStr = string([originalBytes[i], originalBytes[i + 1]]);
-            } else {
-                tmpStr = string([originalBytes[i]]);
-            }
-            (uint num bool _skip) = _getInt(tmpStr);
-            skip = _skip;
-            result += num;
-            skip = false;
-            unchecked {i++;}
+            result += current;
+            unchecked { i += 1; } // 处理单个字符
         }
-        return 0;
+        return result;
     }
 
-    function _getInt(string memory str) internal pure returns (uint64, bool) {
-        if (str == "I") {
-            return (1, false);
-        } else if (str == "V") {
-            return (5, false);
-        } else if (str == "X") {
-            return (10, false);
-        } else if (str == "L") {
-            return (50, false);
-        } else if (str == "C") {
-            return (100, false);
-        } else if (str == "D") {
-            return (500, false);
-        } else if (str == "M") {
-            return (1000, false);
-        } else if (str == "IV") {
-            return (4, true);
-        } else if (str == "IX") {
-            return (9, true);
-        } else if (str == "XL") {
-            return (40, true);
-        } else if (str == "XC") {
-            return (90, true);
-        } else if (str == "CD") {
-            return (400, true);
-        } else if (str == "CM") {
-            return (900, true);
-        }
-        require(false, "invalid roman number");
-        return 0;
+    // 内部函数：罗马字符转数字
+    function _charToUint(bytes1 char) internal pure returns (uint64) {
+        if (char == 'I') return 1;
+        if (char == 'V') return 5;
+        if (char == 'X') return 10;
+        if (char == 'L') return 50;
+        if (char == 'C') return 100;
+        if (char == 'D') return 500;
+        if (char == 'M') return 1000;
+        revert InvalidRomanCharacter();
     }
 }
