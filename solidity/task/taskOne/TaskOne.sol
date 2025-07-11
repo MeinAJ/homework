@@ -169,3 +169,29 @@ contract RomanNumberConvert2IntContract {
         revert InvalidRomanCharacter();
     }
 }
+
+// ✅ 合并两个有序数组 (Merge Sorted Array) //题目描述：将两个有序数组合并为一个有序数组。
+contract MergeSortedArrayContract {
+    function MergeSortedArray(uint[] memory sortedArray1, uint[] memory sortedArray2) public pure returns (uint[] memory){
+        // 思路
+        // 1、sortedArray1和sortedArray2两两比较，小的元素直接放入result中，然后对应的数组index+1，直到两个数组中的一个数组遍历完。
+        // 2、最后可能有一个数组没遍历完。
+        uint[] memory result = new uint[](sortedArray1.length + sortedArray2.length);
+        uint i = 0;
+        uint j = 0;
+        while (i < sortedArray1.length && j < sortedArray2.length) {
+            if (sortedArray1[i] < sortedArray2[j]) {
+                result.push(sortedArray1[i++]);
+            } else {
+                result.push(sortedArray2[j++]);
+            }
+        }
+        while (i < sortedArray1.length) {
+            result.push(sortedArray1[i++]);
+        }
+        while (j < sortedArray2.length) {
+            result.push(sortedArray2[j++]);
+        }
+        return result;
+    }
+}
