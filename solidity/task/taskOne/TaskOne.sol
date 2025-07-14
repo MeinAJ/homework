@@ -73,7 +73,7 @@ contract IntegerToRoman {
         uint256 value;
         string symbol;
     }
-    
+
     RomanNumeral[] private romanNumerals;
 
     constructor() {
@@ -96,24 +96,24 @@ contract IntegerToRoman {
     function intToRoman(uint256 num) public pure returns (string memory) {
         // 参数检查
         require(num > 0 && num < 4000, "Number must be between 1 and 3999");
-        
+
         // 预定义罗马数字符号表（按值从大到小排序）
         RomanNumeral[13] memory numerals = [
-            RomanNumeral(1000, "M"),
-            RomanNumeral(900, "CM"),
-            RomanNumeral(500, "D"),
-            RomanNumeral(400, "CD"),
-            RomanNumeral(100, "C"),
-            RomanNumeral(90, "XC"),
-            RomanNumeral(50, "L"),
-            RomanNumeral(40, "XL"),
-            RomanNumeral(10, "X"),
-            RomanNumeral(9, "IX"),
-            RomanNumeral(5, "V"),
-            RomanNumeral(4, "IV"),
-            RomanNumeral(1, "I")
-        ];
-        
+                        RomanNumeral(1000, "M"),
+                        RomanNumeral(900, "CM"),
+                        RomanNumeral(500, "D"),
+                        RomanNumeral(400, "CD"),
+                        RomanNumeral(100, "C"),
+                        RomanNumeral(90, "XC"),
+                        RomanNumeral(50, "L"),
+                        RomanNumeral(40, "XL"),
+                        RomanNumeral(10, "X"),
+                        RomanNumeral(9, "IX"),
+                        RomanNumeral(5, "V"),
+                        RomanNumeral(4, "IV"),
+                        RomanNumeral(1, "I")
+            ];
+
         // 构建罗马数字字符串
         bytes memory roman;
         for (uint256 i = 0; i < numerals.length; i++) {
@@ -122,24 +122,24 @@ contract IntegerToRoman {
                 num -= numerals[i].value;
             }
         }
-        
+
         return string(roman);
     }
 }
-
 
 // ✅  用 solidity 实现罗马数字转数整数
 //题目描述在 https://leetcode.cn/problems/integer-to-roman/description/
 
 contract RomanNumberConvert2IntContract {
     error InvalidRomanCharacter();
+
     function RomanNumberConvert2Int(string memory str) public pure returns (uint64) {
         bytes memory roman = bytes(str);
         uint256 len = roman.length;
         uint64 result = 0;
         uint64 current;
         uint64 next;
-        for (uint256 i = 0; i < len; ) {
+        for (uint256 i = 0; i < len;) {
             current = _charToUint(roman[i]);
             // 检查是否有下一个字符
             if (i + 1 < len) {
@@ -147,12 +147,12 @@ contract RomanNumberConvert2IntContract {
                 // 组合数字规则：小值在左表示减法
                 if (current < next) {
                     result += (next - current);
-                    unchecked { i += 2; } // 跳过两个字符
+                    unchecked {i += 2;} // 跳过两个字符
                     continue;
                 }
             }
             result += current;
-            unchecked { i += 1; } // 处理单个字符
+            unchecked {i += 1;} // 处理单个字符
         }
         return result;
     }
@@ -213,7 +213,7 @@ contract BinarySearchContract {
         return _binarySearch(0, targetArray.length - 1, targetNumber, targetArray);
     }
 
-    function _binarySearch(uint begin, uint end, uint target, uint[] targetArray) {
+    function _binarySearch(uint begin, uint end, uint target, uint[] targetArray) internal pure {
         uint index = (begin + end + 1) / 2;
         if (targetArray[index] == target) {
             return true;
