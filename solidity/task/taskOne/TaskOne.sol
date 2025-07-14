@@ -195,3 +195,38 @@ contract MergeSortedArrayContract {
         return result;
     }
 }
+
+// ✅ 二分查找 (Binary Search) //题目描述：在一个有序数组中查找目标值。
+contract BinarySearchContract {
+    function BinarySearch(uint[] targetArray, uint targetNumber) public pure returns (bool) {
+        if (targetArray.length == 0) {
+            return false;
+        }
+        // 查中间的值，如果大于中间的值，那就取后半部分，小于就取前半部分，如果相等直接退出，另一个退出条件：当begin=end时，直接退出
+        // 重复上面这个步骤
+        // 0 - 2    begin=0, end=2
+        //（0 + 2 + 1）/ 2 = 1    begin=1 end=2
+        //（1 + 2 + 1）/ 2 = 2    begin=2 end=2
+
+        //(0 + 2 + 1) / 2 = 1   begin=0 end=1
+        //(0 + 1 + 1) / 2 = 1   begin=1 end=1
+        return _binarySearch(0, targetArray.length - 1, targetNumber, targetArray);
+    }
+
+    function _binarySearch(uint begin, uint end, uint target, uint[] targetArray) {
+        uint index = (begin + end + 1) / 2;
+        if (targetArray[index] == target) {
+            return true;
+        }
+        if (begin == end) {
+            return false;
+        }
+        if (targetArray[index] > target) {
+            return _binarySearch(begin, index, target, targetArray);
+        }
+        if (targetArray[index] < target) {
+            return _binarySearch(index, end, target, targetArray);
+        }
+    }
+
+}
