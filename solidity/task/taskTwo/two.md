@@ -88,7 +88,8 @@ main().catch((error) => {
 npx hardhat run scripts/deploy.js --network sepolia
 
 # 安装ipfs-http-client
-npm install ipfs-http-client
+npm uninstall ipfs-http-client
+npm install ipfs-http-client@56.0.3
 
 # 编写以下js脚本
 # getMetadataUrl.js（获取NFT的元数据）
